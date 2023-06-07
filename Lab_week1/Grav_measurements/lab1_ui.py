@@ -18,7 +18,9 @@ class Ui_Form(object):
         self.pushButton = QtWidgets.QPushButton(Form)
         self.pushButton.setGeometry(QtCore.QRect(40, 70, 80, 23))
         self.pushButton.setObjectName("pushButton")
-
+        self.textBrowser = QtWidgets.QTextBrowser(Form)
+        self.textBrowser.setObjectName("Extra data")
+        self.textBrowser.setGeometry(QtCore.QRect(20, 120, 120, 80))
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 

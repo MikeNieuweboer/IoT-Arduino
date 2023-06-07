@@ -1,6 +1,6 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib
-import math as mth
+from math import sqrt
 from lab1_ui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QTimer, QThread, QObject, pyqtSignal
@@ -9,18 +9,18 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from random import randint
 import serial
-from queue import Queue
 import time
 
 
 matplotlib.use("Qt5Agg")
 
 
-class receive_input(QObject):
+class plotter(QObject):
     finished = pyqtSignal()
+    mean = pyqtSignal((float, float))
 
-    def __init__(self, queue):
-        self._queue = queue
+    def __init__(self, canvas):
+        self.canvas = canvas
         QObject.__init__(self)
         self.running = True
 
@@ -28,6 +28,7 @@ class receive_input(QObject):
         global queue
         # arduino = serial.Serial("/dev/ttyACM0", 115200, timeout=None)
         # arduino.write("On".encode())
+        val = ([], [])
         while (self.running):
             # number_str = arduino.readline().decode("ascii")
             # if (number_str == "\n"):
@@ -35,9 +36,20 @@ class receive_input(QObject):
             # print(number_str)
             # coords = mth.sqrt(sum(map(lambda x: x**2,
             #                           map(float, number_str.strip.split('')))))
-            coords = randint(0, 4)
+            coords = randint(0, 3)
             time.sleep(1)
-            self._queue.put(coords)
+            val[1].append(coords)
+            val[0].append(len(val[0]) * 0.5)
+            self.canvas.axes.clear()
+            self.canvas.axes.plot(
+                val[0], val[1], 'r', linewidth=0.5)
+            self.canvas.draw()
+            mean_num = sum(val[1]) / len(val[1])
+            # Standard deviation calculation
+            sd_num = sqrt(
+                sum(map(lambda x: (x - mean_num)**2, val[1])) /
+                (len(val[1]) - 1)) if len(val[1]) > 1 else 0
+            self.mean.emit(mean_num, sd_num)
             if (coords == 4):
                 break
         self.finished.emit()
@@ -54,41 +66,23 @@ class Lab1(QMainWindow):
         self.ui.setupUi(self)
         self.setWindowTitle("arduino_sensors")
         self.ui.pushButton.clicked.connect(self.plot_grav)
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.write_point)
-        self._values = ([], [])
-        self._queue = Queue()
 
-    def write_point(self):
-        val = self._values
-        while not self._queue.empty():
-            val[1].append(self._queue.get())
-            val[0].append(len(val[0]) * 0.5)
-        self.ui.MplWidget.canvas.axes.clear()
-        self.ui.MplWidget.canvas.axes.plot(
-            val[0], val[1], 'r', linewidth=0.5)
-        self.ui.MplWidget.canvas.draw()
-        self.timer.start(500)
-
-    def finish_worker(self):
-        self.write_point()
-        self.timer.stop()
-        self.thread.quit()
+    def print_extra(self, mean, sd):
+        self.ui.textBrowser.setText(
+            "mean:" + format(mean, ".2f") +
+            "\nstandard dev.:" + format(sd, ".2f"))
 
     def plot_grav(self):
-        if self.timer.remainingTime() > 0:
-            self.timer.stop()
+        if self.thread.isRunning():
             self.worker.running = False
-            self._queue = Queue()
             self.thread.quit()
             self.thread.wait()
         else:
-            self._values = ([], [])
-            self.timer.start(500)
-            self.worker = receive_input(self._queue)
+            self.worker = plotter(self.ui.MplWidget.canvas)
             self.worker.moveToThread(self.thread)
             self.thread.started.connect(self.worker.work)
-            self.worker.finished.connect(self.finish_worker)
+            self.worker.finished.connect(self.thread.quit)
+            self.worker.mean.connect(self.print_extra)
             self.thread.start()
 
 
