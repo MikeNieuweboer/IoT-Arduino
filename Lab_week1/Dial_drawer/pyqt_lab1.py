@@ -11,6 +11,20 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 
 matplotlib.use("Qt5Agg")
 
+def render_apple(x, y, width=0.25):
+    return [
+        x + width,
+        x + width,
+        x - width,
+        x - width,
+        x + width
+    ], [
+        y + width,
+        y - width,
+        y - width,
+        y + width,
+        y + width
+    ]
 
 class Lab1(QMainWindow):
     def __init__(self, *args):
