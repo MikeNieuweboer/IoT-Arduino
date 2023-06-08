@@ -25,6 +25,10 @@ class plotter(QObject):
         self.running = True
 
     def set_style(self, min_x):
+        """
+        Sets the style of a matplotlib figure which was plotted before this
+        function call.
+        """
         self.canvas.axes.set_xlabel("Time (s)")
         self.canvas.axes.set_ylabel("Gravitational force (g)")
         self.canvas.axes.set_xticks(range(int(min_x), int(min_x + 9)))
