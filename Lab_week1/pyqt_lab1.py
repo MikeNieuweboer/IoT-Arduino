@@ -27,32 +27,34 @@ class Lab1(QMainWindow):
         self.ui.pushButton_2.clicked.connect(self.reset)
 
     def reset(self):
-        self._values = ([], [])
+        self._values = ([0], [0])
         self.ui.MplWidget.canvas.axes.clear()
         self.ui.MplWidget.canvas.axes.plot(
             self._values[0], self._values[1], 'r', linewidth=0.5)
         self.ui.MplWidget.canvas.draw()
 
     def write_point(self):
-        x = len(self._values[0]) + 1
-        if (x >= self.ui.spinBox_2.value()):
-            self._values = ([], [])
+        val = self._values
+        x = len(val[0]) + 1
+        if (x > self.ui.spinBox_2.value()):
+            val = ([0], [0])
             self.timer.stop()
             return
-        self._values[0].append(len(self._values[0]) + 1)
-        self._values[1].append(randint(0, self.ui.spinBox.value()))
+        val[0].append(len(self._values[0]) + 1)
+        self._values[1].append(min(max(0, val[1][-1] + randint(-1, 1)), 9))
         self.ui.MplWidget.canvas.axes.clear()
         self.ui.MplWidget.canvas.axes.plot(
             self._values[0], self._values[1], 'r', linewidth=0.5)
         self.ui.MplWidget.canvas.axes.set_xlim(0, self.ui.spinBox_2.value())
+        self.ui.MplWidget.canvas.axes.set_ylim(0, 10)
         self.ui.MplWidget.canvas.draw()
-        self.timer.start(120)
+        self.timer.start(self.ui.spinBox.value())
 
     def mybuttonfunction(self):
         if self.timer.remainingTime() > 0:
             self.timer.stop()
         else:
-            self.timer.start(120)
+            self.timer.start(self.ui.spinBox.value())
 
 
 if __name__ == "__main__":
