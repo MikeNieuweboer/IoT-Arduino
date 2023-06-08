@@ -1,18 +1,18 @@
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib
+from matplotlib import use as matplotlib_use
 from math import sqrt
-from lab1_ui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QTimer, QThread, QObject, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtCore import QThread, QObject, pyqtSignal
 import sys
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from random import randint
+from lab1_ui import Ui_Form
 import serial
+from random import randint
+# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# from matplotlib.figure import Figure
+# from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import time
 
 
-matplotlib.use("Qt5Agg")
+matplotlib_use("Qt5Agg")
 
 
 class plotter(QObject):
@@ -24,25 +24,54 @@ class plotter(QObject):
         QObject.__init__(self)
         self.running = True
 
-    def work(self):
-        global queue
-        # arduino = serial.Serial("/dev/ttyACM0", 115200, timeout=None)
-        # arduino.write("On".encode())
+    def set_style(self, min_x):
+        self.canvas.axes.set_xlabel("Time (s)")
+        self.canvas.axes.set_ylabel("Gravitational force (g)")
+        self.canvas.axes.set_xticks(range(int(min_x), int(min_x + 9)))
+        self.canvas.axes.set_xlim(min_x, min_x + 8)
+        self.canvas.axes.legend(loc='upper center', bbox_to_anchor=(
+                0.5, -0.12), ncol=3, fancybox=True, shadow=True)
+        self.canvas.axes.grid(visible=True)
+
+    def plot(self):
+        """
+        Plots the data received from the Arduino through the serial port.
+        Stops when self.running is set to false.
+        Emits finished when done reading input.
+        """
+        arduino = serial.Serial("/dev/ttyACM0", 115200, timeout=None)
+        arduino.write("On".encode())
         val = ([], [])
+        coord_list = []
+        x = 0
         while (self.running):
-            # number_str = arduino.readline().decode("ascii")
-            # if (number_str == "\n"):
-            #     break
-            # print(number_str)
-            # coords = mth.sqrt(sum(map(lambda x: x**2,
-            #                           map(float, number_str.strip.split('')))))
-            coords = randint(0, 3)
-            time.sleep(1)
-            val[1].append(coords)
-            val[0].append(len(val[0]) * 0.5)
+            number_str = arduino.readline().decode("ascii")
+            if (number_str == "\n"):
+                break
+            coords = tuple(map(float, number_str.strip().split(' ')))
+            gs = sqrt(sum(map(lambda x: x**2, coords)))
+            coord_list.append(tuple(coords))
+            min_index = max(0, len(val[0]) - 16)
+            min_x = min_index * 0.5
+            if (min_index > 0):
+                del coord_list[0]
+            val[1].append(gs)
+            val[0].append(x)
+            x += 0.5
             self.canvas.axes.clear()
             self.canvas.axes.plot(
-                val[0], val[1], 'r', linewidth=0.5)
+                val[0][min_index:], [x for x, _, _ in coord_list], 'r',
+                linewidth=0.5, label='Force in x-axis')
+            self.canvas.axes.plot(
+                val[0][min_index:], [y for _, y, _ in coord_list], 'g',
+                linewidth=0.5, label='Force in y-axis')
+            self.canvas.axes.plot(
+                val[0][min_index:], [z for _, _, z in coord_list], 'b',
+                linewidth=0.5, label='Force in z-axis')
+            self.canvas.axes.plot(
+                val[0][min_index:], val[1][min_index:], 'k', linewidth=1,
+                label='Combined g-force')
+            self.set_style(min_x)
             self.canvas.draw()
             mean_num = sum(val[1]) / len(val[1])
             # Standard deviation calculation
@@ -68,11 +97,20 @@ class Lab1(QMainWindow):
         self.ui.pushButton.clicked.connect(self.plot_grav)
 
     def print_extra(self, mean, sd):
+        """
+        Sets the text of the textbrowser to the given mean
+        and standard deviation.
+        """
         self.ui.textBrowser.setText(
-            "mean:" + format(mean, ".2f") +
-            "\nstandard dev.:" + format(sd, ".2f"))
+            "mean: " + format(mean, ".2f") +
+            "\nstandard dev. : " + format(sd, ".2f"))
 
     def plot_grav(self):
+        """
+        Starts a worker thread which receives input from the
+        Arduino and plots the gravitational data in the figure.
+        If a thread is running it shuts it down instead.
+        """
         if self.thread.isRunning():
             self.worker.running = False
             self.thread.quit()
@@ -80,7 +118,7 @@ class Lab1(QMainWindow):
         else:
             self.worker = plotter(self.ui.MplWidget.canvas)
             self.worker.moveToThread(self.thread)
-            self.thread.started.connect(self.worker.work)
+            self.thread.started.connect(self.worker.plot)
             self.worker.finished.connect(self.thread.quit)
             self.worker.mean.connect(self.print_extra)
             self.thread.start()

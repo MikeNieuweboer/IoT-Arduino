@@ -6,21 +6,23 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+from mplwidget import MplWidget
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(543, 364)
+        Form.setFixedSize(800, 520)
         self.MplWidget = MplWidget(Form)
-        self.MplWidget.setGeometry(QtCore.QRect(150, 10, 381, 341))
+        self.MplWidget.setGeometry(QtCore.QRect(190, 10, 600, 500))
         self.MplWidget.setObjectName("MplWidget")
         self.pushButton = QtWidgets.QPushButton(Form)
-        self.pushButton.setGeometry(QtCore.QRect(40, 70, 80, 23))
+        self.pushButton.setGeometry(QtCore.QRect(25, 40, 150, 50))
         self.pushButton.setObjectName("pushButton")
         self.textBrowser = QtWidgets.QTextBrowser(Form)
         self.textBrowser.setObjectName("Extra data")
-        self.textBrowser.setGeometry(QtCore.QRect(20, 120, 120, 80))
+        self.textBrowser.setGeometry(QtCore.QRect(20, 120, 160, 80))
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -28,5 +30,3 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.pushButton.setText(_translate("Form", "Start/Stop"))
-
-from mplwidget import MplWidget
