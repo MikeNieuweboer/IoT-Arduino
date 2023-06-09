@@ -30,6 +30,8 @@ class Ui_Form(object):
         self.spinBox_2 = QtWidgets.QSpinBox(self.groupBox)
         self.spinBox_2.setGeometry(QtCore.QRect(10, 20, 47, 24))
         self.spinBox_2.setObjectName("spinBox_2")
+        self.spinBox.setProperty("value", 20)
+        self.spinBox_2.setProperty("value", 25)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)

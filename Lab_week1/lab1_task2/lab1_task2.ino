@@ -1,16 +1,20 @@
 // -------------------------------------------
-//
-//  Poject: Lab1_task1
-//  Group:
-//  Students:
-//  Date:
+//  Poject: Lab1_task2
+//  Group: G
+//  Students: Rob Bieman, Mike Nieuweboer
+//  Date: 8 juni 2023
 //  ------------------------------------------
 
-#define OFF 0
-#define ON 1
+#include <RTCZero.h>
 
-// put your setup code here
+RTCZero rtc;
+String answers[] = {"LED on", "LED off", "LED blink"};
+enum states {ON, OFF, BLINK};
+
+states state;
+
 void setup() {
+  state = OFF;
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
@@ -19,32 +23,46 @@ void setup() {
   Serial.begin(9600);
 
   // wait for serial port to connect. Needed for native USB port only
-  while (!Serial) {} 
+  while (!Serial); 
   
   // init digital IO pins
   digitalWrite(LED_BUILTIN, LOW); 
+
+  rtc.begin(); // initialize RTC 24H format
+
+  rtc.attachInterrupt(blink);
 }
 
-// put your main code here
+// Loop to receive and execute commands for builtin led.
 void loop() {
   if (Serial.available()) {
     String str = Serial.readString();
     str.trim();
-    if (str == "on") {
+    if (str == "On") {
       digitalWrite(LED_BUILTIN, HIGH);
-    } else if (str == "off") {
+      rtc.disableAlarm();
+      state = ON;
+      Serial.println(answers[state]);
+    } else if (str == "Off") {
       digitalWrite(LED_BUILTIN, LOW);
-    } else if (str == "blink") {
-      bool was_on = digitalRead(LED_BUILTIN); 
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(1000);
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(1000);
-      digitalWrite(LED_BUILTIN, was_on ? HIGH : LOW);
+      rtc.disableAlarm();
+      state = OFF;
+      Serial.println(answers[state]);
+    } else if (str == "Blink") {
+      blink();
+      state = BLINK;
+      Serial.println(answers[state]);
     } else if (str == "status") {
-      Serial.println(digitalRead(LED_BUILTIN) ? "On" : "Off");
+      Serial.println(answers[state]);
     } else {
-      Serial.println("Unkown command");
+      Serial.println("Unknown command");
     }
   }
+}
+
+// Resets the alarm and inverts the current led status.
+void blink() {
+  rtc.setAlarmSeconds(rtc.getSeconds());
+  rtc.enableAlarm(rtc.MATCH_SS);
+  digitalWrite(LED_BUILTIN, digitalRead(LED_BUILTIN) == HIGH ? LOW : HIGH);
 }

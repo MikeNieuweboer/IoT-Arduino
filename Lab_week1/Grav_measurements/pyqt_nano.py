@@ -1,3 +1,12 @@
+# Poject: Lab1_task2
+# Group: G
+# Students: Rob Bieman, Mike Nieuweboer
+# Date: 8 juni 2023
+#
+# Communicates with arduino to get 30 measurements of the accelerometer over
+# 15 seconds. Displays the g-forces in the x, y and z axes along with their
+# combined values, of which the mean and standard deviation are printed out.
+
 from matplotlib import use as matplotlib_use
 from math import sqrt
 from PyQt5.QtWidgets import QMainWindow, QApplication
@@ -5,11 +14,6 @@ from PyQt5.QtCore import QThread, QObject, pyqtSignal
 import sys
 from lab1_ui import Ui_Form
 import serial
-from random import randint
-# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-# from matplotlib.figure import Figure
-# from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import time
 
 
 matplotlib_use("Qt5Agg")
@@ -34,7 +38,7 @@ class plotter(QObject):
         self.canvas.axes.set_xticks(range(int(min_x), int(min_x + 9)))
         self.canvas.axes.set_xlim(min_x, min_x + 8)
         self.canvas.axes.legend(loc='upper center', bbox_to_anchor=(
-                0.5, -0.12), ncol=3, fancybox=True, shadow=True)
+            0.5, -0.12), ncol=3, fancybox=True, shadow=True)
         self.canvas.axes.grid(visible=True)
 
     def plot(self):
