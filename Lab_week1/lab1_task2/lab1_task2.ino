@@ -25,6 +25,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW); 
 }
 
+a = (x for x, _, _ in val[1])
+
 // put your main code here
 void loop() {
   if (Serial.available()) {
