@@ -1,17 +1,14 @@
 // -------------------------------------------
-//
 //  Poject: Lab1_task1
-//  Group:
-//  Students:
-//  Date:
+//  Group: G
+//  Students: Rob Bieman, Mike Nieuweboer
+//  Date: 8 juni 2023
 //  ------------------------------------------
 
-#define OFF 0
-#define ON 1
+String answers[] = {"LED on", "LED off"};
+enum states {OFF = LOW, ON = HIGH};
 
-// put your setup code here
 void setup() {
-
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -25,18 +22,19 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW); 
 }
 
-
-// put your main code here
+// Loop to receive and execute commands for builtin led.
 void loop() {
   while (!Serial.available()) {}
   String str = Serial.readString();
   str.trim();
   if (str == "On") {
     digitalWrite(LED_BUILTIN, HIGH);
+    Serial.println(answers[ON]);
   } else if (str == "Off") {
     digitalWrite(LED_BUILTIN, LOW);
+    Serial.println(answers[OFF]);
   } else if (str == "status") {
-    Serial.println(digitalRead(LED_BUILTIN) == HIGH ? "On" : "Off");
+    Serial.println(digitalRead(LED_BUILTIN) == HIGH ? answers[ON] : answers[OFF]);
   } else {
     Serial.println("Unkown command");
   }
