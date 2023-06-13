@@ -5,7 +5,7 @@
 //  Date: 8 juni 2023
 //  ------------------------------------------
 
-String answers[] = {"LED on", "LED off"};
+String answers[] = {"LED off", "LED on"};
 enum states {OFF = LOW, ON = HIGH};
 
 void setup() {
@@ -36,6 +36,6 @@ void loop() {
   } else if (str == "status") {
     Serial.println(digitalRead(LED_BUILTIN) == HIGH ? answers[ON] : answers[OFF]);
   } else {
-    Serial.println("Unkown command");
+    Serial.println("Unknown command");
   }
 }

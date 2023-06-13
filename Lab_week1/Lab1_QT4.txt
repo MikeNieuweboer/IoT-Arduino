@@ -1,0 +1,8 @@
+De kracht in de x-as wordt groter als de Arduino rechtop wordt gehouden, y wordt groter op zijn zij en z wanneer hij plat ligt. Hieruit is te concluderen dat de versnellingsmeter de x-waardes in de lengte meet, de y-waardes in de breedte en z loodrecht op het oppervlak.
+          y
+          |
+----------------------
+|                    |
+|         z          |  --> x
+|                    |
+----------------------

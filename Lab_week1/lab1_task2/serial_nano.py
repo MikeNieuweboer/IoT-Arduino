@@ -1,4 +1,4 @@
-# Poject: Lab1_task2
+# Poject: Lab1_task3
 # Group: G
 # Students: Rob Bieman, Mike Nieuweboer
 # Date: 8 juni 2023
@@ -20,7 +20,7 @@ def write_read(x):
     arduino.write(x.encode())
 
     # time for arduino to respond
-    time.sleep(0.9)
+    time.sleep(1.1)
 
     # receive data and convert to ascii
     data = arduino.readline().decode('ascii')
