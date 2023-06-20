@@ -29,6 +29,8 @@ succes, img = cap.read()
 if not succes:
     exit()
 
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
 for y, column in enumerate(output):
     for x, _ in enumerate(column):
         old_coords = np.matmul(rot_matrix, np.array([[x - width / 2], [y - height / 2]]))
